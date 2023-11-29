@@ -34,18 +34,13 @@ type CommandLineInterface struct {
 }
 
 func New(ctx context.Context) *CommandLineInterface {
-	serviceProvider := ctx.Value(providers.ServiceProviderKey).(*providers.ServiceProvider)
-
-	authUseCase := authUC.NewUseCase(serviceProvider.BlacklistService, serviceProvider.WhitelistService, serviceProvider.BucketService)
-	blackListUseCase := blacklistUC.NewUseCase(serviceProvider.BlacklistService)
-	whiteListUseCase := whiteListUC.NewUseCase(serviceProvider.WhitelistService)
-	bucketUseCase := bucketUC.NewUseCase(serviceProvider.BucketService)
+	useCaseProvider := ctx.Value(providers.UseCaseProviderKey).(*providers.UseCaseProvider)
 
 	return &CommandLineInterface{
-		authUseCase:      authUseCase,
-		blackListUseCase: blackListUseCase,
-		whiteListUseCase: whiteListUseCase,
-		bucketUseCase:    bucketUseCase,
+		authUseCase:      useCaseProvider.AuthUseCase,
+		blackListUseCase: useCaseProvider.BlackListUseCase,
+		whiteListUseCase: useCaseProvider.WhiteListUseCase,
+		bucketUseCase:    useCaseProvider.BucketUseCase,
 	}
 }
 

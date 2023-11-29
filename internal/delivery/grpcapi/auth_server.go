@@ -1,8 +1,8 @@
-package grpc
+package grpcapi
 
 import (
 	"context"
-	"github.com/MaxFando/anti-bruteforce/internal/delivery/grpc/authpb"
+	"github.com/MaxFando/anti-bruteforce/internal/delivery/grpcapi/authpb"
 	"github.com/MaxFando/anti-bruteforce/internal/domain/network"
 	"github.com/MaxFando/anti-bruteforce/internal/usecase/auth"
 	"github.com/MaxFando/anti-bruteforce/pkg/utils"

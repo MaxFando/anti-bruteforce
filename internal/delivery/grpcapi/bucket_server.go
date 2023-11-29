@@ -1,8 +1,8 @@
-package grpc
+package grpcapi
 
 import (
 	"context"
-	"github.com/MaxFando/anti-bruteforce/internal/delivery/grpc/bucketpb"
+	"github.com/MaxFando/anti-bruteforce/internal/delivery/grpcapi/bucketpb"
 	"github.com/MaxFando/anti-bruteforce/internal/usecase/bucket"
 )
 

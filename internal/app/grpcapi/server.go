@@ -1,11 +1,14 @@
 package grpcapi
 
 import (
+	"context"
 	"github.com/MaxFando/anti-bruteforce/internal/config"
-	"github.com/MaxFando/anti-bruteforce/internal/delivery/grpc/authpb"
-	"github.com/MaxFando/anti-bruteforce/internal/delivery/grpc/blacklistpb"
-	"github.com/MaxFando/anti-bruteforce/internal/delivery/grpc/bucketpb"
-	"github.com/MaxFando/anti-bruteforce/internal/delivery/grpc/whitelistpb"
+	"github.com/MaxFando/anti-bruteforce/internal/delivery/grpcapi"
+	"github.com/MaxFando/anti-bruteforce/internal/delivery/grpcapi/authpb"
+	"github.com/MaxFando/anti-bruteforce/internal/delivery/grpcapi/blacklistpb"
+	"github.com/MaxFando/anti-bruteforce/internal/delivery/grpcapi/bucketpb"
+	"github.com/MaxFando/anti-bruteforce/internal/delivery/grpcapi/whitelistpb"
+	"github.com/MaxFando/anti-bruteforce/internal/providers"
 	"github.com/MaxFando/anti-bruteforce/pkg/utils"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -14,22 +17,23 @@ import (
 )
 
 type Server struct {
-	blackListServer     blacklistpb.BlackListServiceServer
-	whiteListServer     whitelistpb.WhiteListServiceServer
-	bucketServer        bucketpb.BucketServiceServer
-	authorizationServer authpb.AuthorizationServer
+	blackListServer     *grpcapi.BlacklistServer
+	whiteListServer     *grpcapi.WhitelistServer
+	bucketServer        *grpcapi.BucketServer
+	authorizationServer *grpcapi.AuthServer
 	grpcServer          *grpc.Server
 
 	errors chan error
 }
 
-func NewServer(
-	blackListServer blacklistpb.BlackListServiceServer,
-	whiteListServer whitelistpb.WhiteListServiceServer,
-	bucketServer bucketpb.BucketServiceServer,
-	authorizationServer authpb.AuthorizationServer,
-) *Server {
+func NewServer(ctx context.Context) *Server {
 	grpcServer := grpc.NewServer()
+
+	useCaseProvider := ctx.Value(providers.UseCaseProviderKey).(*providers.UseCaseProvider)
+	blackListServer := grpcapi.NewBlacklistServer(useCaseProvider.BlackListUseCase)
+	whiteListServer := grpcapi.NewWhiteListServer(useCaseProvider.WhiteListUseCase)
+	bucketServer := grpcapi.NewBucketServer(useCaseProvider.BucketUseCase)
+	authorizationServer := grpcapi.NewAuthServer(useCaseProvider.AuthUseCase)
 
 	return &Server{
 		blackListServer:     blackListServer,
@@ -45,7 +49,6 @@ func NewServer(
 func (s *Server) Serve() {
 	utils.Logger.Info("Start GRPC Server")
 
-	// todo: не игнорировать ошибку
 	listener, _ := net.Listen("tcp", config.Config.Listen.BindIP+":"+config.Config.Listen.Port)
 
 	blacklistpb.RegisterBlackListServiceServer(s.grpcServer, s.blackListServer)
