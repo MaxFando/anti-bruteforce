@@ -1,0 +1,29 @@
+version: '3.7'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: app.dockerfile
+    restart: unless-stopped
+    env_file: ./.env
+    depends_on:
+      - db
+    ports:
+      - "80:${HTTP_PORT:-80}"
+
+  db:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_DB: "postgres"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./migrations/000001_init.up.sql:/docker-entrypoint-initdb.d/create_tables.sql
+    ports:
+      - "5432:5432"
+
+volumes:
+  db-data:
